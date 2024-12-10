@@ -4,7 +4,7 @@ const EventsPage = async ({ searchParams }) => {
     const EVENTS_URL = 'https://qevent-backend.labs.crio.do/events';
 
     const fetchEvents = async () => {
-        const res = await fetch(EVENTS_URL, {cache: 'no-store'});
+        const res = await fetch(EVENTS_URL, { cache: 'no-store' });
 
         if (!res || !res.ok) {
             throw new Error('Failed to fetch data')
@@ -14,7 +14,14 @@ const EventsPage = async ({ searchParams }) => {
     }
 
     const events = await fetchEvents();
-    const filteredEvents = searchParams && searchParams.artist ? events.filter((event) => event.artist === searchParams.artist) : events;
+
+    const filteredEvents = events.filter((event) => {
+        if (searchParams.artist)
+            return event.artist === searchParams.artist;
+        if (searchParams.tag)
+            return  event.tags ? event.tags.includes(searchParams.tag) : false;
+        return events;
+    });
 
     return (
         <div className="flex flex-wrap justify-around">
