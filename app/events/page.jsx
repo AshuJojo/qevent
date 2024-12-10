@@ -6,7 +6,7 @@ const EventsPage = async () => {
     const fetchEvents = async () => {
         const res = await fetch(EVENTS_URL);
 
-        if (!res.ok) {
+        if (!res || !res.ok) {
             throw new Error('Failed to fetch data')
         }
 
