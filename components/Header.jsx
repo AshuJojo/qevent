@@ -15,8 +15,6 @@ import { TfiTicket } from "react-icons/tfi";
 const Header = () => {
   const session = useSession();
 
-  console.log('session', session);
-
   return (
     <nav className="drop-shadow-2xl flex items-center justify-between p-3 border-b border-slate-200 border-spacing-0 bg-slate-100 h-24">
       <div className="hover-inverse flex items-center justify-center gap-2">
@@ -77,22 +75,35 @@ const Header = () => {
             <p>Tags</p>
           </Link>
 
-          {session?.data ? (
+          {session?.data && (
+            <Link
+              href={'/create-event'}
+              className="flex items-center justify-center gap-2 hover:text-primary hover:scale-105 hover:underline-offset-8 hover:underline transition-all"
+            >
+              <div className="scale-110">
+                <FaRegHeart />
+              </div>
+
+              <p>Create Event</p>
+            </Link>
+          )}
+
+          {session?.data && (
             <button
               onClick={() => { signOut() }}
               className=" bg-gradient-to-r from-orange-400 to-teal-600 text-white px-4 py-2 rounded-md font-medium hover:opacity-70"
             >
               Logout
             </button>
-          ) : null}
-          {!session?.data ? (
+          )}
+          {!session?.data && (
             <button
               onClick={() => { signIn() }}
               className=" bg-gradient-to-r from-orange-400 to-teal-600 text-white px-4 py-2 rounded-md font-medium hover:opacity-70"
             >
               Log in
             </button>
-          ) : null}
+          )}
         </div>
         <div className="flex justify-center items-center gap-4 max-sm:gap-1"></div>
       </div>
