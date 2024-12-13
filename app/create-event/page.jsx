@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 
 const CreateEventPage = () => {
@@ -11,6 +12,7 @@ const CreateEventPage = () => {
 
     const [mounted, setMounted] = useState(false);
     const [formInput, setFormInput] = useState({
+        id: uuidv4(),
         name: '',
         location: '',
         dateTime: '',
@@ -20,6 +22,8 @@ const CreateEventPage = () => {
         price: '',
         description: ''
     });
+
+    const [formInputError, setFormInputError] = useState(null)
 
     // Handle form input change
     const handleInputChange = (e) => {
@@ -33,9 +37,68 @@ const CreateEventPage = () => {
     }
 
     // handle form submit
-    const handleEventCreate = (e) => {
+    const handleEventCreate = async (e) => {
         e.preventDefault();
-        console.log('form Submitted');
+
+        setFormInputError(null);
+
+        if (
+            formInput.name
+            && formInput.location
+            && formInput.dateTime
+            && formInput.image
+            && formInput.artist
+            && formInput.price
+            && formInput.description
+        ) {
+
+            console.log('formInput', formInput);
+            const { dateTime, tags, price, ...data } = formInput;
+
+            const tagsArr = tags.split(',');
+
+            const dateTimeObj = new Date(dateTime);
+
+            const dateOptions = {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            }
+            const timeOptions = {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            }
+
+            const date = dateTimeObj.toLocaleDateString('en-CA', dateOptions);
+            const time = dateTimeObj.toLocaleTimeString('en-US', timeOptions);
+
+            const eventData = { ...data, price: Number(price), date, time, tags: tagsArr };
+
+            try {
+                const res = await fetch('https://qevent-backend.labs.crio.do/events',
+                    {
+                        method: 'POST',
+                        body: JSON.stringify(eventData),
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+
+                console.log('res', res);
+
+                if (!res.ok) {
+                    alert('Event creation failed');
+                } else {
+                    router.push('/events');
+                }
+            } catch (e) {
+                alert('Event creation failed');
+            }
+        } else {
+            setFormInputError('All Fields are required.')
+        }
     }
 
     // Checks if the user is logged in using auth session
@@ -55,6 +118,8 @@ const CreateEventPage = () => {
                     className="grid grid-cols-12 auto-cols-min gap-2 m-4 py-4 min-w-96"
                     onSubmit={handleEventCreate}
                 >
+                    {formInputError && <p className="col-span-12 text-center text-lg border-2 border-red-400 py-2 mb-5 rounded-lg bg-red-200 text-red-600">{formInputError}</p>}
+
                     {/* Event Name */}
                     <label
                         className="text-lg col-span-2 text-end"
@@ -115,7 +180,6 @@ const CreateEventPage = () => {
                         type="text"
                         value={formInput.tags}
                         onChange={handleInputChange}
-                        required
                     />
 
                     {/* Image */}
